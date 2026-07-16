@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.db import Base, engine
 from app import models
-from app.isir_client import get_last_podnet_id, list_operations
+from app.isir_client import get_last_podnet_id
 
 app = FastAPI()
 
