@@ -20,7 +20,5 @@ def health():
 
 @app.get("/isir/last-id")
 def isir_last_id():
-
     last_id = get_last_podnet_id()
-
     return {"last_id": last_id}
