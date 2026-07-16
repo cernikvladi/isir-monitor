@@ -6,10 +6,14 @@ WSDL_URL = (
 )
 
 
-def get_last_podnet_id() -> int:
+def get_last_podnet_id():
     client = Client(WSDL_URL)
     response = client.service.getIsirWsPublicPodnetPosledniId()
-    return int(response.cisloPosledniId)
+    return {
+        "response_type": str(type(response)),
+        "response": str(response),
+        "last_id": str(response.cisloPosledniId),
+    }
 
 
 def list_operations() -> list[str]:
