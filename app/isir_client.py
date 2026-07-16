@@ -6,22 +6,31 @@ WSDL_URL = (
 )
 
 
-def get_last_podnet_id():
+def get_last_podnet_id() -> int:
     client = Client(WSDL_URL)
     response = client.service.getIsirWsPublicPodnetPosledniId()
-    return {
-        "response_type": str(type(response)),
-        "response": str(response),
-        "last_id": str(response.cisloPosledniId),
-    }
+
+    if response.status.stav != "OK":
+        raise RuntimeError(
+            f"ISIR chyba {response.status.kodChyby}: "
+            f"{response.status.popisChyby}"
+        )
+
+    if not response.cisloPosledniId:
+        raise RuntimeError("ISIR nevrátil poslední ID.")
+
+    return int(response.cisloPosledniId[0])
 
 
 def list_operations() -> list[str]:
     client = Client(WSDL_URL)
+
     operations: list[str] = []
+
     for service in client.wsdl.services.values():
         for port in service.ports.values():
             operations.extend(port.binding._operations.keys())
+
     return sorted(set(operations))
 
 
