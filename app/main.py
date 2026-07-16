@@ -20,8 +20,4 @@ def health():
 
 @app.get("/isir/last-id")
 def isir_last_id():
-    return {"last_id": get_last_podnet_id()}
-
-@app.get("/isir/operations")
-def isir_operations():
-    return {"operations": list_operations()}
+    return get_last_podnet_id()

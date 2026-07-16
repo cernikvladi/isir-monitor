@@ -8,21 +8,18 @@ WSDL_URL = (
 
 client = Client(WSDL_URL)
 
-def get_last_podnet_id() -> int:
 
+def get_last_podnet_id() -> dict:
     start = time.time()
 
     response = client.service.getIsirWsPublicPodnetPosledniId()
 
     elapsed = time.time() - start
 
-    print(f"ISIR call took {elapsed:.2f}s")
-
     if response.status.stav != "OK":
-
         raise RuntimeError(response.status.popisChyby)
 
-    return int(response.cisloPosledniId[0])
-
-
-
+    return {
+        "last_id": int(response.cisloPosledniId[0]),
+        "elapsed_seconds": round(elapsed, 2),
+    }
