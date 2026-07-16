@@ -6,8 +6,9 @@ WSDL_URL = (
     "isir_public_ws/IsirWsPublicService?wsdl"
 )
 
+t0 = time.time()
 client = Client(WSDL_URL)
-
+print(f"Client init took {time.time() - t0:.2f}s")
 
 def get_last_podnet_id() -> dict:
     start = time.time()
