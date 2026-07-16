@@ -5,10 +5,12 @@ WSDL_URL = (
     "isir_public_ws/IsirWsPublicService?wsdl"
 )
 
+
 def get_last_podnet_id() -> int:
     client = Client(WSDL_URL)
-    response = client.service.getIsirWsPublicPosledniId()
+    response = client.service.getIsirWsPublicPodnetPosledniId()
     return int(response.cisloPosledniId)
+
 
 def list_operations() -> list[str]:
     client = Client(WSDL_URL)
@@ -17,8 +19,6 @@ def list_operations() -> list[str]:
         for port in service.ports.values():
             operations.extend(port.binding._operations.keys())
     return sorted(set(operations))
-
-
 
 
 

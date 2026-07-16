@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from app.db import Base, engine
 from app import models
-from app.isir_client import get_last_podnet_id
-from app.isir_client import list_operations
+from app.isir_client import get_last_podnet_id, list_operations
 
 app = FastAPI()
 
@@ -21,8 +20,7 @@ def health():
 
 @app.get("/isir/last-id")
 def isir_last_id():
-    last_id = get_last_podnet_id()
-    return {"last_id": last_id}
+    return {"last_id": get_last_podnet_id()}
 
 @app.get("/isir/operations")
 def isir_operations():
