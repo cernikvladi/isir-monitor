@@ -1,3 +1,4 @@
+import time
 from zeep import Client
 
 WSDL_URL = (
@@ -5,33 +6,23 @@ WSDL_URL = (
     "isir_public_ws/IsirWsPublicService?wsdl"
 )
 
+client = Client(WSDL_URL)
 
 def get_last_podnet_id() -> int:
-    client = Client(WSDL_URL)
+
+    start = time.time()
+
     response = client.service.getIsirWsPublicPodnetPosledniId()
 
-    if response.status.stav != "OK":
-        raise RuntimeError(
-            f"ISIR chyba {response.status.kodChyby}: "
-            f"{response.status.popisChyby}"
-        )
+    elapsed = time.time() - start
 
-    if not response.cisloPosledniId:
-        raise RuntimeError("ISIR nevrátil poslední ID.")
+    print(f"ISIR call took {elapsed:.2f}s")
+
+    if response.status.stav != "OK":
+
+        raise RuntimeError(response.status.popisChyby)
 
     return int(response.cisloPosledniId[0])
-
-
-def list_operations() -> list[str]:
-    client = Client(WSDL_URL)
-
-    operations: list[str] = []
-
-    for service in client.wsdl.services.values():
-        for port in service.ports.values():
-            operations.extend(port.binding._operations.keys())
-
-    return sorted(set(operations))
 
 
 
