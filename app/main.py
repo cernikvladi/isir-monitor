@@ -1,5 +1,4 @@
 import logging
-import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import BackgroundTasks, FastAPI
@@ -11,47 +10,24 @@ from app.sync import bootstrap, run_sync_cycle
 
 logger = logging.getLogger(__name__)
 
-# Popis_WS_1 1.7 recommends at least a 10 minute interval between requests
-# from one client; default sits comfortably above that.
-SYNC_INTERVAL_MINUTES = int(os.getenv("SYNC_INTERVAL_MINUTES", "15"))
-
 app = FastAPI()
+# Kept for a future targeted-case polling job; nothing is scheduled on it yet.
 scheduler = BackgroundScheduler()
-
-
-def _scheduled_sync_tick() -> None:
-    """Runs on every scheduler interval. bootstrap() is idempotent: on a cold
-    cursor it does the one-time backfill (binary search + full drain, which
-    can run long), and on every call after that it's just an unbounded drain
-    of whatever's new - a single cheap no-op call once caught up. Because the
-    job has max_instances=1, a slow first run simply causes later ticks to be
-    skipped rather than overlap."""
-    session = SessionLocal()
-    try:
-        count = bootstrap(session)
-        logger.info("sync tick ingested %d events", count)
-    except Exception:
-        logger.exception("sync tick failed")
-    finally:
-        session.close()
 
 
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
-    scheduler.add_job(
-        _scheduled_sync_tick,
-        "interval",
-        minutes=SYNC_INTERVAL_MINUTES,
-        max_instances=1,
-        coalesce=True,
-    )
-    scheduler.start()
+    # Full-register periodic sync is paused: we're moving to a targeted
+    # case-list design instead of syncing the entire ISIR event stream (see
+    # the disk-full incident on the full-register backfill). /sync/bootstrap
+    # and /sync/run below still work for manual/on-demand use.
 
 
 @app.on_event("shutdown")
 def shutdown() -> None:
-    scheduler.shutdown(wait=False)
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
 
 
 @app.get("/")
